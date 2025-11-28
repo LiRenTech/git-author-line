@@ -1,71 +1,52 @@
-# vscode-git-tool README
+# Git Line Author README
 
-This is the README for your extension "vscode-git-tool". After writing up a brief description, we recommend including the following sections.
+Git Line Author is a VSCode extension that displays git author information next to line numbers, similar to JetBrains IDEs.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+* **Author Display**: Shows the git author name next to each line number
+* **Color Coded**: Background color varies from dark to light blue based on modification time
+* **Auto-Adaptive Text**: Text color automatically adjusts to background brightness
+* **Toggle Switch**: Easy on/off toggle in the status bar
+* **File-Specific Time Range**: Color gradient is based on the current file's modification history
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+* Git must be installed and accessible in your PATH
+* Works with any Git repository
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+This extension contributes the following commands:
 
-For example:
+* `git-line-author.toggle`: Toggle the display of git author information
 
-This extension contributes the following settings:
+## Usage
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+1. Open any file in a Git repository
+2. The extension will automatically display author information next to line numbers
+3. Click the status bar item ("$(eye) Git Author: On/Off") to toggle display
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+* Currently only displays the author name, not commit message or other details
+* May have performance issues with very large files
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
+Initial release of Git Line Author
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+* Basic author display functionality
+* Color coded background based on modification time
+* Status bar toggle
+* Auto-adaptive text color
 
 ---
 
 ## Following extension guidelines
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+This extension follows the [VS Code Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines).
 
 **Enjoy!**
