@@ -36,38 +36,58 @@ class GitLineAuthor {
 			before: {
 				contentText: '',
 				color: new vscode.ThemeColor('editorLineNumber.foreground'),
-				margin: '0 8px 0 0'
+				margin: '0 8px 0 0',
+				width: '150px'
 			}
 		});
 	}
 
-	private getAuthorColor(timestamp: number): string {
-		// Calculate time difference in days
-		const now = Date.now() / 1000;
-		const daysDiff = Math.floor((now - timestamp) / (60 * 60 * 24));
+	private getBackgroundColor(timestamp: number, minTimestamp: number, maxTimestamp: number): string {
+		// Normalize timestamp within the file's range (0 = oldest, 1 = newest)
+		const normalized = (timestamp - minTimestamp) / (maxTimestamp - minTimestamp);
 		
-		// Define color range: recent (bright blue) to old (dark blue)
-		// Bright blue: #4A90E2, Dark blue: #1A365D
-		// Adjust based on days (max 365 days for full darkening)
-		const maxDays = 365;
-		const normalizedDays = Math.min(daysDiff / maxDays, 1);
+		// Define color range: oldest (very dark blue) to newest (very light blue)
+		// Very dark blue: #0A1128 (almost black)
+		// Very light blue: #E0F7FF (almost white)
 		
-		// Calculate RGB components
-		const r1 = 74; // Bright blue R
-		const g1 = 144; // Bright blue G
-		const b1 = 226; // Bright blue B
+		// Dark blue RGB
+		const darkR = 10;
+		const darkG = 17;
+		const darkB = 40;
 		
-		const r2 = 26; // Dark blue R
-		const g2 = 54; // Dark blue G
-		const b2 = 93; // Dark blue B
+		// Light blue RGB
+		const lightR = 224;
+		const lightG = 247;
+		const lightB = 255;
 		
-		// Interpolate between bright and dark based on normalized days
-		const r = Math.round(r1 + (r2 - r1) * normalizedDays);
-		const g = Math.round(g1 + (g2 - g1) * normalizedDays);
-		const b = Math.round(b1 + (b2 - b1) * normalizedDays);
+		// Interpolate between dark and light based on normalized timestamp
+		// Note: normalized = 0 is oldest, so we use (1 - normalized) for dark to light
+		const r = Math.round(darkR + (lightR - darkR) * normalized);
+		const g = Math.round(darkG + (lightG - darkG) * normalized);
+		const b = Math.round(darkB + (lightB - darkB) * normalized);
 		
 		// Convert to hex color
 		return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+	}
+
+	private getTextColor(backgroundColor: string): string {
+		// Extract RGB components from hex color
+		const hex = backgroundColor.replace('#', '');
+		const r = parseInt(hex.substring(0, 2), 16);
+		const g = parseInt(hex.substring(2, 4), 16);
+		const b = parseInt(hex.substring(4, 6), 16);
+		
+		// Calculate relative luminance (perceived brightness)
+		// Using formula from WCAG 2.0: https://www.w3.org/TR/WCAG20/#relativeluminancedef
+		const [rs, gs, bs] = [r, g, b].map(c => {
+			const s = c / 255;
+			return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+		});
+		const luminance = 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+		
+		// Use black text for light backgrounds, white text for dark backgrounds
+		// Threshold of 0.5 is a common choice
+		return luminance > 0.5 ? '#000000' : '#FFFFFF';
 	}
 
 	private async getGitBlameInfo(filePath: string): Promise<Map<number, GitBlameInfo>> {
@@ -124,6 +144,19 @@ class GitLineAuthor {
 		const filePath = editor.document.uri.fsPath;
 		const blameInfo = await this.getGitBlameInfo(filePath);
 
+		// Calculate min and max timestamps for this file
+		let minTimestamp = Infinity;
+		let maxTimestamp = -Infinity;
+		blameInfo.forEach(info => {
+			minTimestamp = Math.min(minTimestamp, info.timestamp);
+			maxTimestamp = Math.max(maxTimestamp, info.timestamp);
+		});
+
+		// Ensure we have a valid range
+		if (minTimestamp === maxTimestamp) {
+			minTimestamp = maxTimestamp - 86400; // 1 day difference if all timestamps are the same
+		}
+
 		const decorationOptions: vscode.DecorationOptions[] = [];
 
 		for (let line = 0; line < editor.document.lineCount; line++) {
@@ -132,13 +165,15 @@ class GitLineAuthor {
 
 			if (info) {
 				const range = new vscode.Range(line, 0, line, 0);
-				const color = this.getAuthorColor(info.timestamp);
+				const backgroundColor = this.getBackgroundColor(info.timestamp, minTimestamp, maxTimestamp);
+				const textColor = this.getTextColor(backgroundColor);
 				decorationOptions.push({
 					range,
 					renderOptions: {
 						before: {
 							contentText: info.author,
-							color: color
+							backgroundColor: backgroundColor,
+							color: textColor
 						}
 					}
 				});
