@@ -22,8 +22,8 @@ class GitLineAuthor {
 
 	constructor() {
 		this.createDecorationType();
-		this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-		this.statusBarItem.text = '$(eye) Git Author: On';
+		this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+		this.statusBarItem.text = 'GitAuthorLine:Off';
 		this.statusBarItem.tooltip = 'Toggle Git Author Display';
 		this.statusBarItem.command = 'git-line-author.toggle';
 		this.statusBarItem.show();
@@ -207,7 +207,7 @@ class GitLineAuthor {
 		}
 
 		this.isActive = true;
-		this.statusBarItem.text = '$(eye) Git Author: On';
+		this.statusBarItem.text = 'GitAuthorLine:On';
 
 		// Update decorations for all visible editors
 		vscode.window.visibleTextEditors.forEach(editor => {
@@ -228,7 +228,7 @@ class GitLineAuthor {
 		}
 
 		this.isActive = false;
-		this.statusBarItem.text = '$(eye) Git Author: Off';
+		this.statusBarItem.text = 'GitAuthorLine:Off';
 
 		// Clear decorations from all editors
 		const decorationType = this.decorationType;
@@ -278,10 +278,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(disposable);
 
-	// Activate by default
-	if (gitLineAuthor) {
-		gitLineAuthor.activate();
-	}
+	// Default to inactive
+	// gitLineAuthor.activate();
 }
 
 // This method is called when your extension is deactivated
