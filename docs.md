@@ -1,3 +1,3 @@
-## 编译
+## 编译并打包
 
-pnpm run compile
+pnpm run package && vsce package
