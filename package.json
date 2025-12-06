@@ -4,6 +4,7 @@
   "description": "Display git author information next to line numbers in VSCode",
   "version": "0.0.1",
   "license": "MIT",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.106.1"
   },
