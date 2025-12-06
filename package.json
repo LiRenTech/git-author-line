@@ -3,6 +3,8 @@
   "displayName": "Git Line Author",
   "description": "Display git author information next to line numbers in VSCode",
   "version": "0.0.1",
+  "publisher": "LiRenTech",
+  "author": "LiRenTech",
   "license": "MIT",
   "icon": "icon.png",
   "engines": {
