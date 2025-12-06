@@ -88,18 +88,28 @@ class GitLineAuthor {
 		// Normalize timestamp within the file's range (0 = oldest, 1 = newest)
 		const normalized = (timestamp - minTimestamp) / (maxTimestamp - minTimestamp);
 		
-		// Get hue based on commit subject
+		// Check if any regex pattern matches
+		let matched = false;
 		let hue = 240; // Default blue
 		
-		// Check each regex pattern
 		for (const config of this.colorConfigs) {
 			if (new RegExp(config.regex).test(subject)) {
 				hue = config.hue;
+				matched = true;
 				break;
 			}
 		}
 		
-		// Convert HSL to RGB
+		// If no match, use grayscale
+		if (!matched) {
+			// For no match, use grayscale from dark gray to light gray
+			// Normalized: 0 (oldest) -> dark gray, 1 (newest) -> light gray
+			const grayValue = Math.round(50 + normalized * 205); // 50 (dark) to 255 (light)
+			const hexValue = grayValue.toString(16).padStart(2, '0');
+			return `#${hexValue}${hexValue}${hexValue}`;
+		}
+		
+		// Convert HSL to RGB for matched patterns
 		// hue: 0-360, saturation: 0.7, lightness: varies based on timestamp
 		const saturation = 0.7;
 		const lightness = 0.3 + normalized * 0.6; // Oldest: 0.3 (dark), Newest: 0.9 (light)

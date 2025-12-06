@@ -12,6 +12,7 @@ Git Line Author is a VSCode extension that displays git author information next 
 * **File-Specific Time Range**: Color gradient is based on the current file's modification history
 * **Default Off**: Starts in inactive mode, only activates when explicitly toggled
 * **Customizable Colors**: User-configurable regex patterns with associated hue values for color coding
+* **Gray Scale for Unmatched**: Uses grayscale color transition (dark to light) for commits that don't match any regex pattern
 
 ## Requirements
 
@@ -59,11 +60,11 @@ This extension contributes the following settings:
 
 Each default color configuration has a thoughtful design behind it:
 
-* **Blue (240° - Default/Refactor)**: Blue is VSCode's symbolic color, representing default commits. It also symbolizes innovation and the future, making it suitable for feature additions.
-* **Red (0° - Features)**: Red symbolizes danger, making it appropriate for bug fix commits.
-* **Green (120° - Documentation)**: Green is traditionally used for comments in code and represents safety. Documentation changes are safe and non-intrusive, much like comments.
-* **Yellow (60° - Fixes)**: Yellow is a bright cautionary color that alerts other developers that this code has been refactored, making it suitable for refactor commits.
-* **Purple (300° - Tests)**: Purple evokes mystery and exploration, reflecting the experimental and investigative nature of testing new functionality, making it appropriate for test commits.
+* **Blue**: Blue is VSCode's symbolic color, representing default commits. It also symbolizes innovation and the future, making it suitable for feature additions.
+* **Red**: Red symbolizes danger, making it appropriate for bug fix commits.
+* **Green**: Green is traditionally used for comments in code and represents safety. Documentation changes are safe and non-intrusive, much like comments.
+* **Yellow**: Yellow is a bright cautionary color that alerts other developers that this code has been refactored, making it suitable for refactor commits.
+* **Purple**: Purple evokes mystery and exploration, reflecting the experimental and investigative nature of testing new functionality, making it appropriate for test commits.
 
 ---
 
@@ -71,11 +72,11 @@ Each default color configuration has a thoughtful design behind it:
 
 每个默认颜色配置都有其精心设计的理念：
 
-* **蓝色 (240° - 默认/重构)**: 蓝色是VSCode的标志性颜色，代表默认提交，同时蓝色也有创新和未来的含义，所以作为feat提交
-* **红色 (0° - 功能)**: 红色象征危险，所以作为fix的bug修复提交。
-* **绿色 (120° - 文档)**: 绿色传统上用于代码中的注释，代表安全。文档更改是安全且非侵入性的，就像注释一样。
-* **黄色 (60° - 修复)**: 黄色是一种亮眼的警示色，用于提醒其他开发者注意这段代码是被重构了的。所以作为refactor提交。
-* **紫色 (300° - 测试)**: 紫色唤起神秘和探索感，反映了测试新功能的实验性和调查性本质。所以作为test提交。
+* **蓝色**: 蓝色是VSCode的标志性颜色，代表默认提交，同时蓝色也有创新和未来的含义，所以作为feat提交
+* **红色**: 红色象征危险，所以作为fix的bug修复提交。
+* **绿色**: 绿色传统上用于代码中的注释，代表安全。文档更改是安全且非侵入性的，就像注释一样。
+* **黄色**: 黄色是一种亮眼的警示色，用于提醒其他开发者注意这段代码是被重构了的。所以作为refactor提交。
+* **紫色**: 紫色唤起神秘和探索感，反映了测试新功能的实验性和调查性本质。所以作为test提交。
 
 ## Usage
 
@@ -121,6 +122,7 @@ Git Line Author 是一个 VSCode 扩展，用于在行号旁显示 Git 作者信
 * **文件特定时间范围**：颜色渐变基于当前文件的修改历史
 * **默认关闭**：初始处于非激活状态，仅在用户明确切换时激活
 * **可自定义颜色**：用户可配置的正则表达式模式，带有关联的色相值用于颜色编码
+* **未匹配的灰度显示**：对于不匹配任何正则表达式的提交，使用灰度颜色过渡（从深到浅）
 
 ## 要求
 
