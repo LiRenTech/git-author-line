@@ -19,7 +19,54 @@
         "command": "git-line-author.toggle",
         "title": "Toggle Git Line Author"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Git Line Author",
+      "properties": {
+        "gitLineAuthor.colorConfigs": {
+          "type": "array",
+          "default": [
+            {
+              "regex": "^feat",
+              "hue": 234
+            },
+            {
+              "regex": "^fix",
+              "hue": 0
+            },
+            {
+              "regex": "^docs",
+              "hue": 100
+            },
+            {
+              "regex": "^refactor",
+              "hue": 60
+            },
+            {
+              "regex": "^test",
+              "hue": 308
+            }
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "regex": {
+                "type": "string",
+                "description": "Regular expression to match commit messages"
+              },
+              "hue": {
+                "type": "number",
+                "description": "Hue value (0-360) for the color gradient",
+                "minimum": 0,
+                "maximum": 360
+              }
+            },
+            "required": ["regex", "hue"]
+          },
+          "description": "Color configurations for commit message matching"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",

@@ -10,7 +10,14 @@ interface GitBlameInfo {
 	commit: string;
 	timestamp: number;
 	date: string;
+	dateString: string;
 	subject: string;
+}
+
+// Color config interface for user settings
+interface ColorConfig {
+	regex: string;
+	hue: number;
 }
 
 // Extension state
@@ -19,6 +26,17 @@ class GitLineAuthor {
 	private isActive: boolean = false;
 	private decorations: Map<string, vscode.DecorationOptions[]> = new Map();
 	private statusBarItem: vscode.StatusBarItem;
+	private colorConfigs: ColorConfig[];
+	
+	// Default color configurations
+  // https://www.ysdaima.com/tools/color-wheel
+	private readonly defaultColorConfigs: ColorConfig[] = [
+		{ regex: '^feat', hue: 234 },
+		{ regex: '^fix', hue: 0 },
+		{ regex: '^docs', hue: 100 },
+		{ regex: '^refactor', hue: 60 },
+		{ regex: '^test', hue: 308 }
+	];
 
 	constructor() {
 		this.createDecorationType();
@@ -27,6 +45,30 @@ class GitLineAuthor {
 		this.statusBarItem.tooltip = 'Toggle Git Author Display';
 		this.statusBarItem.command = 'git-line-author.toggle';
 		this.statusBarItem.show();
+		
+		// Initialize color configs
+		this.colorConfigs = this.defaultColorConfigs;
+		
+		// Load initial configuration
+		this.loadConfiguration();
+		
+		// Watch for configuration changes
+		vscode.workspace.onDidChangeConfiguration((e) => {
+			if (e.affectsConfiguration('gitLineAuthor')) {
+				this.loadConfiguration();
+				// Refresh decorations for all visible editors
+				if (this.isActive) {
+					vscode.window.visibleTextEditors.forEach(editor => {
+						this.updateDecorations(editor);
+					});
+				}
+			}
+		});
+	}
+
+	private loadConfiguration() {
+		const config = vscode.workspace.getConfiguration('gitLineAuthor');
+		this.colorConfigs = config.get<ColorConfig[]>('colorConfigs', this.defaultColorConfigs);
 	}
 
 	private createDecorationType() {
@@ -37,34 +79,59 @@ class GitLineAuthor {
 				contentText: '',
 				color: new vscode.ThemeColor('editorLineNumber.foreground'),
 				margin: '0 8px 0 0',
-				width: '150px'
+				width: '250px'
 			}
 		});
 	}
 
-	private getBackgroundColor(timestamp: number, minTimestamp: number, maxTimestamp: number): string {
+	private getBackgroundColor(timestamp: number, minTimestamp: number, maxTimestamp: number, subject: string): string {
 		// Normalize timestamp within the file's range (0 = oldest, 1 = newest)
 		const normalized = (timestamp - minTimestamp) / (maxTimestamp - minTimestamp);
 		
-		// Define color range: oldest (very dark blue) to newest (very light blue)
-		// Very dark blue: #0A1128 (almost black)
-		// Very light blue: #E0F7FF (almost white)
+		// Get hue based on commit subject
+		let hue = 240; // Default blue
 		
-		// Dark blue RGB
-		const darkR = 10;
-		const darkG = 17;
-		const darkB = 40;
+		// Check each regex pattern
+		for (const config of this.colorConfigs) {
+			if (new RegExp(config.regex).test(subject)) {
+				hue = config.hue;
+				break;
+			}
+		}
 		
-		// Light blue RGB
-		const lightR = 224;
-		const lightG = 247;
-		const lightB = 255;
+		// Convert HSL to RGB
+		// hue: 0-360, saturation: 0.7, lightness: varies based on timestamp
+		const saturation = 0.7;
+		const lightness = 0.3 + normalized * 0.6; // Oldest: 0.3 (dark), Newest: 0.9 (light)
 		
-		// Interpolate between dark and light based on normalized timestamp
-		// Note: normalized = 0 is oldest, so we use (1 - normalized) for dark to light
-		const r = Math.round(darkR + (lightR - darkR) * normalized);
-		const g = Math.round(darkG + (lightG - darkG) * normalized);
-		const b = Math.round(darkB + (lightB - darkB) * normalized);
+		const hslToRgb = (h: number, s: number, l: number): [number, number, number] => {
+			const c = (1 - Math.abs(2 * l - 1)) * s;
+			const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+			const m = l - c / 2;
+			let r = 0, g = 0, b = 0;
+			
+			if (0 <= h && h < 60) {
+				r = c; g = x; b = 0;
+			} else if (60 <= h && h < 120) {
+				r = x; g = c; b = 0;
+			} else if (120 <= h && h < 180) {
+				r = 0; g = c; b = x;
+			} else if (180 <= h && h < 240) {
+				r = 0; g = x; b = c;
+			} else if (240 <= h && h < 300) {
+				r = x; g = 0; b = c;
+			} else if (300 <= h && h < 360) {
+				r = c; g = 0; b = x;
+			}
+			
+			return [
+				Math.round((r + m) * 255),
+				Math.round((g + m) * 255),
+				Math.round((b + m) * 255)
+			];
+		};
+		
+		const [r, g, b] = hslToRgb(hue, saturation, lightness);
 		
 		// Convert to hex color
 		return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
@@ -112,6 +179,12 @@ class GitLineAuthor {
 					const timestamp = parseInt(line.substring(15));
 					currentBlameInfo.timestamp = timestamp;
 					currentBlameInfo.date = new Date(timestamp * 1000).toLocaleDateString();
+					// Format date as YY/MM/DD
+					const date = new Date(timestamp * 1000);
+					const year = date.getFullYear().toString().slice(-2);
+					const month = (date.getMonth() + 1).toString().padStart(2, '0');
+					const day = date.getDate().toString().padStart(2, '0');
+					currentBlameInfo.dateString = `${year}/${month}/${day}`;
 				} else if (line.startsWith('summary ')) {
 					currentBlameInfo.subject = line.substring(8);
 				} else if (line.startsWith('\t')) {
@@ -122,6 +195,7 @@ class GitLineAuthor {
 							commit: '',
 							timestamp: currentBlameInfo.timestamp!,
 							date: currentBlameInfo.date || '',
+							dateString: currentBlameInfo.dateString || '',
 							subject: currentBlameInfo.subject || ''
 						});
 					}
@@ -165,13 +239,13 @@ class GitLineAuthor {
 
 			if (info) {
 				const range = new vscode.Range(line, 0, line, 0);
-				const backgroundColor = this.getBackgroundColor(info.timestamp, minTimestamp, maxTimestamp);
+				const backgroundColor = this.getBackgroundColor(info.timestamp, minTimestamp, maxTimestamp, info.subject);
 				const textColor = this.getTextColor(backgroundColor);
 				decorationOptions.push({
 					range,
 					renderOptions: {
 						before: {
-							contentText: info.author,
+							contentText: `${info.dateString} ${info.author}`,
 							backgroundColor: backgroundColor,
 							color: textColor
 						}
