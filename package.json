@@ -7,6 +7,10 @@
   "author": "LiRenTech",
   "license": "MIT",
   "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LiRenTech/git-author-line.git"
+  },
   "engines": {
     "vscode": "^1.106.1"
   },
