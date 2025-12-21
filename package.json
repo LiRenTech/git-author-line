@@ -2,7 +2,7 @@
   "name": "git-line-author",
   "displayName": "Git Line Author",
   "description": "Display git author information next to line numbers in VSCode",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "LiRenTech",
   "author": "LiRenTech",
   "license": "MIT",
@@ -12,7 +12,7 @@
     "url": "https://github.com/LiRenTech/git-author-line.git"
   },
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.70.0"
   },
   "categories": [
     "Other"
@@ -91,7 +91,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.106.1",
+    "@types/vscode": "^1.70.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "typescript-eslint": "^8.46.3",
