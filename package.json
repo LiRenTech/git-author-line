@@ -22,6 +22,29 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "icons": {
+      "eye-disabled": {
+        "description": "Disabled eye icon with slash",
+        "default": {
+          "fontPath": "media/eye-line.woff",
+          "fontCharacter": "\\E001"
+        }
+      },
+      "eye-enabled": {
+        "description": "Enabled eye icon",
+        "default": {
+          "fontPath": "media/eye-line.woff",
+          "fontCharacter": "\\E002"
+        }
+      },
+      "lines-icon": {
+        "description": "Four horizontal lines icon",
+        "default": {
+          "fontPath": "media/eye-line.woff",
+          "fontCharacter": "\\E003"
+        }
+      }
+    },
     "commands": [
       {
         "command": "git-line-author.toggle",
@@ -69,7 +92,10 @@
                 "maximum": 360
               }
             },
-            "required": ["regex", "hue"]
+            "required": [
+              "regex",
+              "hue"
+            ]
           },
           "description": "Color configurations for commit message matching"
         }
