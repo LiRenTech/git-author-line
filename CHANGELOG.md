@@ -1,9 +1,22 @@
-# Change Log
+## 发布说明
 
-All notable changes to the "vscode-git-tool" extension will be documented in this file.
+### 0.0.3
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+更新README
 
-## [Unreleased]
+### 0.0.2
 
-- Initial release
+- 更新了扩展图标
+- 改进了提交消息匹配的颜色配置
+- 增强了状态栏图标
+
+### 0.0.1
+
+- 基本作者显示功能
+- 基于修改时间的颜色编码背景
+- 左侧状态栏切换开关
+- 自适应文字颜色
+- 默认关闭模式
+- 文件特定时间范围的颜色渐变
+- 简化的日期格式（YY/MM/DD）
+- 基于正则表达式的可自定义颜色配置
