@@ -27,6 +27,10 @@ export class GitLineAuthor {
 	private decorations: Map<string, vscode.DecorationOptions[]> = new Map();
 	private statusBarItem: vscode.StatusBarItem;
 	private colorConfigs: ColorConfig[];
+	private readonly darkThemeKinds = new Set<vscode.ColorThemeKind>([
+		vscode.ColorThemeKind.Dark,
+		vscode.ColorThemeKind.HighContrast,
+	]);
 
 	// Default color configurations
 	// https://www.ysdaima.com/tools/color-wheel
@@ -67,6 +71,13 @@ export class GitLineAuthor {
 				}
 			}
 		});
+		vscode.window.onDidChangeActiveColorTheme(() => {
+			if (this.isActive) {
+				vscode.window.visibleTextEditors.forEach((editor) => {
+					this.updateDecorations(editor);
+				});
+			}
+		});
 	}
 
 	private loadConfiguration() {
@@ -90,19 +101,30 @@ export class GitLineAuthor {
 		});
 	}
 
+	private isDarkTheme() {
+		return this.darkThemeKinds.has(vscode.window.activeColorTheme.kind);
+	}
+
+	private getLightnessRange(matched: boolean): [number, number] {
+		if (this.isDarkTheme()) {
+			return matched ? [0.18, 0.34] : [0.16, 0.3];
+		}
+		return matched ? [0.78, 0.92] : [0.8, 0.94];
+	}
+
 	private getBackgroundColor(
 		timestamp: number,
 		minTimestamp: number,
 		maxTimestamp: number,
 		subject: string,
 	): string {
-		// Normalize timestamp within the file's range (0 = oldest, 1 = newest)
-		const normalized =
-			(timestamp - minTimestamp) / (maxTimestamp - minTimestamp);
+		const normalized = Math.max(
+			0,
+			Math.min(1, (timestamp - minTimestamp) / (maxTimestamp - minTimestamp)),
+		);
 
-		// Check if any regex pattern matches
 		let matched = false;
-		let hue = 240; // Default blue
+		let hue = 240;
 
 		for (const config of this.colorConfigs) {
 			if (new RegExp(config.regex).test(subject)) {
@@ -112,23 +134,14 @@ export class GitLineAuthor {
 			}
 		}
 
-		// If no match, use grayscale
-		if (!matched) {
-			// For no match, use grayscale from dark gray to light gray
-			// Normalized: 0 (oldest) -> dark gray, 1 (newest) -> light gray
-			const grayValue = Math.round(50 + normalized * 205); // 50 (dark) to 255 (light)
-			const hexValue = grayValue.toString(16).padStart(2, "0");
-			return `#${hexValue}${hexValue}${hexValue}`;
-		}
-
-		// Convert HSL to RGB for matched patterns
-		// hue: 0-360, saturation: 0.7, lightness: varies based on timestamp
-		const saturation = 0.7;
-		const lightness = 0.3 + normalized * 0.6; // Oldest: 0.3 (dark), Newest: 0.9 (light)
+		const saturation = matched ? 0.34 : 0;
+		const [minLightness, maxLightness] = this.getLightnessRange(matched);
+		const adjustedNormalized = this.isDarkTheme() ? normalized : 1 - normalized;
+		const lightness =
+			minLightness + adjustedNormalized * (maxLightness - minLightness);
 
 		const [r, g, b] = hslToRgb(hue, saturation, lightness);
 
-		// Convert to hex color
 		return `#${r.toString(16).padStart(2, "0")}${g
 			.toString(16)
 			.padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
